@@ -1,0 +1,167 @@
+// backend/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  nom          String
+  prenom       String
+  email        String   @unique
+  telephone    String?
+  motDePasse   String
+  role         String   @default("CLIENT") // "CLIENT" | "LOUEUR" | "ADMINISTRATEUR"
+  actif        Boolean  @default(true)
+  adresse      String?
+  photo        String?
+  refreshToken String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  biens             Bien[]        @relation("UserBiens")
+  reservations      Reservation[] @relation("UserReservations")
+  alertes           Alerte[]      @relation("UserAlertes")
+  messagesEnvoyes   Message[]     @relation("MessageExpediteur")
+  messagesRecus     Message[]     @relation("MessageDestinataire")
+  avis              Avis[]        @relation("UserAvis")
+
+  @@map("User")
+}
+
+model Bien {
+  id          String    @id @default(uuid())
+  titre       String
+  description String
+  adresse     String
+  ville       String
+  superficie  Float
+  nbPieces    Int
+  loyer       Float
+  type        String    // "APPARTEMENT" | "MAISON" | "STUDIO" | "CHAMBRE"
+  equipements Json      // Array of strings
+  lat         Float
+  lng         Float
+  statut      String    @default("DISPONIBLE") // "DISPONIBLE" | "EN_TRAVAUX" | "INDISPONIBLE"
+  photos      Json      // Array of strings
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  loueur   User   @relation("UserBiens", fields: [loueurId], references: [id], onDelete: Cascade)
+  loueurId String
+
+  annonces     Annonce[]     @relation("BienAnnonces")
+  reservations Reservation[] @relation("BienReservations")
+  avis         Avis[]        @relation("BienAvis")
+
+  @@map("Bien")
+}
+
+model Annonce {
+  id          String   @id @default(uuid())
+  titre       String
+  description String
+  prixParNuit Float
+  statut      String   @default("EN_ATTENTE") // "EN_ATTENTE" | "ACTIF" | "REJETEE" | "ARCHIVE"
+  motifRejet  String?
+  vues        Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bien   Bien   @relation("BienAnnonces", fields: [bienId], references: [id], onDelete: Cascade)
+  bienId String
+
+  reservations Reservation[] @relation("AnnonceReservations")
+
+  @@map("Annonce")
+}
+
+model Reservation {
+  id           String   @id @default(uuid())
+  checkIn      DateTime
+  checkOut     DateTime
+  nbNuits      Int
+  montantTotal Float
+  statut       String   @default("EN_ATTENTE") // "EN_ATTENTE" | "CONFIRMEE" | "ANNULEE" | "TERMINEE"
+  message      String?
+  rappelEnvoye Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  annonce   Annonce @relation("AnnonceReservations", fields: [annonceId], references: [id], onDelete: Cascade)
+  annonceId String
+  bien      Bien    @relation("BienReservations", fields: [bienId], references: [id], onDelete: Cascade)
+  bienId    String
+  client    User    @relation("UserReservations", fields: [clientId], references: [id], onDelete: Cascade)
+  clientId  String
+
+  paiements Paiement[] @relation("ReservationPaiements")
+
+  @@map("Reservation")
+}
+
+model Paiement {
+  id        String   @id @default(uuid())
+  amount    Float
+  methode   String   // "CARTE" | "WAVE" | "ORANGE_MONEY"
+  statut    String   @default("EN_ATTENTE") // "EN_ATTENTE" | "PAYE" | "REMBOURSE"
+  reference String   @unique
+  meta      String?  // JSON stringified payload
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reservation   Reservation @relation("ReservationPaiements", fields: [reservationId], references: [id], onDelete: Cascade)
+  reservationId String
+
+  @@map("Paiement")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  contenu   String
+  lu        Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  expediteur     User   @relation("MessageExpediteur", fields: [expediteurId], references: [id], onDelete: Cascade)
+  expediteurId   String
+  destinataire   User   @relation("MessageDestinataire", fields: [destinataireId], references: [id], onDelete: Cascade)
+  destinataireId String
+
+  @@map("Message")
+}
+
+model Alerte {
+  id        String   @id @default(uuid())
+  type      String
+  message   String
+  lu        Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation("UserAlertes", fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  @@map("Alerte")
+}
+
+model Avis {
+  id          String   @id @default(uuid())
+  note        Int
+  commentaire String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bien     Bien   @relation("BienAvis", fields: [bienId], references: [id], onDelete: Cascade)
+  bienId   String
+  client   User   @relation("UserAvis", fields: [clientId], references: [id], onDelete: Cascade)
+  clientId String
+
+  @@map("Avis")
+}

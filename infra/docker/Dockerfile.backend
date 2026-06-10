@@ -1,0 +1,56 @@
+# --- STAGE 1: Build & Compile TypeScript ---
+FROM node:20-alpine AS builder
+
+WORKDIR /usr/src/app
+
+# Copy dependency configuration files
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Install all development and runtime dependencies
+RUN npm ci
+
+# Copy application source code
+COPY . .
+
+# Generate Prisma Client
+RUN npx prisma generate
+
+# Compile TypeScript to JavaScript in /dist
+RUN npm run build
+
+# Prune node_modules to keep only production dependencies
+RUN npm prune --production
+
+
+# --- STAGE 2: Lightweight Production Execution ---
+FROM node:20-alpine AS production
+
+WORKDIR /usr/src/app
+
+ENV NODE_ENV=production
+ENV PORT=5000
+
+# Copy compiled resources and production dependencies from builder stage
+COPY --from=builder /usr/src/app/package*.json ./
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/prisma ./prisma
+
+# Use non-root node user provided by the base alpine image for security compliance
+USER node
+
+EXPOSE 5000
+
+# Native Node.js health check script targeting the public /health route
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD node -e " \
+    const http = require('http'); \
+    const req = http.request('http://localhost:5000/health', { method: 'GET', timeout: 2000 }, (res) => { \
+      process.exit(res.statusCode === 200 ? 0 : 1); \
+    }); \
+    req.on('error', () => process.exit(1)); \
+    req.end(); \
+  "
+
+CMD ["node", "dist/server.js"]
