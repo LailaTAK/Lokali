@@ -98,6 +98,17 @@ export async function getUserById(id: string): Promise<any> {
  * @returns {Promise<any>} The updated user profile.
  */
 export async function updateUser(id: string, data: UpdateUserInput): Promise<any> {
+  if (data.email) {
+    const existingUser = await prisma.user.findUnique({
+      where: { email: data.email },
+      select: { id: true },
+    });
+
+    if (existingUser && existingUser.id !== id) {
+      throw new AppError('Cette adresse email est deja utilisee.', 409);
+    }
+  }
+
   // Update database record
   const updatedUser = await prisma.user.update({
     where: { id },

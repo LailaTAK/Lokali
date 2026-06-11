@@ -9,6 +9,7 @@ import { z } from 'zod';
 export const updateUserSchema = z.object({
   nom: z.string().min(1, 'Le nom ne peut pas être vide.').optional(),
   prenom: z.string().min(1, 'Le prénom ne peut pas être vide.').optional(),
+  email: z.string().email("L'adresse email est invalide.").optional(),
   telephone: z.string().optional(),
   adresse: z.string().optional(),
   photo: z.string().url("L'URL de la photo est invalide.").optional(),
