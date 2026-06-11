@@ -211,7 +211,7 @@ export default function BienDetailsScreen() {
 
         <Button
           label="Réserver"
-          onPress={() => router.push({ pathname: '/(client)/reservation', params: { id: bien.id } })}
+          onPress={() => router.push({ pathname: '/reservation', params: { id: bien.id } })}
           style={styles.reserveBtn}
         />
       </View>

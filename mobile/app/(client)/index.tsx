@@ -177,7 +177,7 @@ export default function ExploreScreen() {
               loyer={item.loyer}
               type={item.type}
               statut={item.statut}
-              onPress={() => router.push({ pathname: '/(client)/bien/[id]', params: { id: item.id } })}
+              onPress={() => router.push({ pathname: '/bien/[id]', params: { id: item.id } })}
             />
           )}
         />
@@ -192,7 +192,7 @@ export default function ExploreScreen() {
               lng: b.lng,
               photo: b.photos?.[0],
             }))}
-            onSelectProperty={(id) => router.push({ pathname: '/(client)/bien/[id]', params: { id } })}
+            onSelectProperty={(id) => router.push({ pathname: '/bien/[id]', params: { id } })}
           />
         </View>
       )}

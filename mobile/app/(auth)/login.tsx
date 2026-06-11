@@ -134,7 +134,7 @@ export default function LoginScreen() {
           />
 
           {/* Forgot Password link */}
-          <Link href="/(auth)/forgot-password" asChild>
+          <Link href="/forgot-password" asChild>
             <Pressable style={styles.forgotPasswordPressable}>
               <Text style={styles.forgotPasswordText}>Mot de passe oublié ?</Text>
             </Pressable>
@@ -152,7 +152,7 @@ export default function LoginScreen() {
           {/* Footer Navigation link */}
           <View style={styles.footerRow}>
             <Text style={styles.footerText}>Nouveau sur Lokali ? </Text>
-            <Link href="/(auth)/register" asChild>
+            <Link href="/register" asChild>
               <Pressable>
                 <Text style={styles.registerLinkText}>Créer un compte</Text>
               </Pressable>

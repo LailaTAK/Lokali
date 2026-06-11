@@ -167,7 +167,7 @@ export default function ModifierBienScreen() {
           onPress: () => {
             // Reload list and return
             useBiensStore.getState().fetchBiens(true);
-            router.replace('/(loueur)/biens');
+            router.replace('/biens');
           },
         },
       ]);

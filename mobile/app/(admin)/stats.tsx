@@ -84,14 +84,14 @@ export default function AdminStatsScreen() {
       {/* Tabs navigation shortcuts */}
       <View style={styles.navShortcutsRow}>
         <Pressable
-          onPress={() => router.push('/(admin)/annonces')}
+          onPress={() => router.push('/annonces')}
           style={[styles.shortcutBtn, shadows.sm]}
         >
           <Ionicons name="shield-checkmark-outline" size={20} color={colors.light.primary} />
           <Text style={styles.shortcutText}>Modération</Text>
         </Pressable>
         <Pressable
-          onPress={() => router.push('/(admin)/utilisateurs')}
+          onPress={() => router.push('/utilisateurs')}
           style={[styles.shortcutBtn, shadows.sm, { marginLeft: spacing.sm }]}
         >
           <Ionicons name="people-outline" size={20} color={colors.light.primary} />

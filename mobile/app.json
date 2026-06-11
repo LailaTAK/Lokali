@@ -2,6 +2,7 @@
   "expo": {
     "name": "Lokali",
     "slug": "lokali",
+    "scheme": "lokali",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",
@@ -23,12 +24,30 @@
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#534AB7"
       },
-      "package": "com.lokali.app"
+      "package": "com.lokali.app",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "plugins": [
       "expo-router",
       "expo-secure-store",
       "expo-location"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "56b1a391-3cf9-4967-8ad1-cd1830875843"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/56b1a391-3cf9-4967-8ad1-cd1830875843"
+    }
   }
 }

@@ -61,7 +61,7 @@ export function useAuth() {
     } catch (error) {
       console.error('Failed to restore authentication on startup:', error);
       clearAuth();
-      router.replace('/(auth)/login');
+      router.replace('/login');
     }
   };
 
@@ -70,16 +70,16 @@ export function useAuth() {
    */
   const handleRoleRedirect = () => {
     if (!isAuthenticated || !user) {
-      router.replace('/(auth)/login');
+      router.replace('/login');
       return;
     }
 
     if (user.role === 'ADMINISTRATEUR') {
-      router.replace('/admin/dashboard');
+      router.replace('/stats');
     } else if (user.role === 'LOUEUR') {
-      router.replace('/loueur/dashboard');
+      router.replace('/dashboard');
     } else {
-      router.replace('/(tabs)/explore/index');
+      router.replace('/');
     }
   };
 
