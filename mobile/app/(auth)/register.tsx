@@ -366,7 +366,7 @@ export default function RegisterScreen() {
           {/* Footer Back navigation link */}
           <View style={styles.footerRow}>
             <Text style={styles.footerText}>Déjà inscrit ? </Text>
-            <Link href="/(auth)/login" asChild>
+            <Link href="/login" asChild>
               <Pressable>
                 <Text style={styles.loginLinkText}>Se connecter</Text>
               </Pressable>

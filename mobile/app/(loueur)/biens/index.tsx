@@ -198,7 +198,7 @@ export default function BiensListScreen() {
               <Pressable
                 onPress={() =>
                   router.push({
-                    pathname: '/(loueur)/biens/[id]/modifier',
+                    pathname: '/biens/[id]/modifier',
                     params: { id: item.id },
                   })
                 }
@@ -224,7 +224,7 @@ export default function BiensListScreen() {
 
       {/* Floating Action Button (FAB) "+" */}
       <Pressable
-        onPress={() => router.push('/(loueur)/biens/ajouter')}
+        onPress={() => router.push('/biens/ajouter')}
         style={[styles.fab, shadows.md]}
       >
         <Ionicons name="add" size={28} color={colors.palette.white} />

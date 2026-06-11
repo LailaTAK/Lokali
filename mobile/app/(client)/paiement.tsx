@@ -276,7 +276,7 @@ export default function PaymentScreen() {
 
             <Button
               label="Accéder à l'historique"
-              onPress={() => router.replace('/(client)/historique')}
+              onPress={() => router.replace('/historique')}
               fullWidth={true}
               style={styles.statusActionBtn}
             />

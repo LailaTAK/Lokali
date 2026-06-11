@@ -224,7 +224,7 @@ export default function AjouterBienScreen() {
           onPress: () => {
             // Reload list and return
             useBiensStore.getState().fetchBiens(true);
-            router.replace('/(loueur)/biens');
+            router.replace('/biens');
           },
         },
       ]);

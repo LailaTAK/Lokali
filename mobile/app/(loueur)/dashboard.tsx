@@ -100,7 +100,7 @@ export default function LoueurDashboard() {
         {/* Urgent alert banners */}
         {stats.pendingReservations > 0 && (
           <Pressable
-            onPress={() => router.push('/(loueur)/reservations')}
+            onPress={() => router.push('/reservations')}
             style={styles.alertBanner}
           >
             <Ionicons name="notifications-outline" size={20} color={colors.palette.white} />
@@ -154,7 +154,7 @@ export default function LoueurDashboard() {
         {/* Property Listing management shortcuts */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Mes propriétés ({biens.length})</Text>
-          <Pressable onPress={() => router.push('/(loueur)/biens')}>
+          <Pressable onPress={() => router.push('/biens')}>
             <Text style={styles.sectionLink}>Gérer</Text>
           </Pressable>
         </View>
@@ -162,7 +162,7 @@ export default function LoueurDashboard() {
         {/* 5 Latest Bookings List */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Dernières réservations</Text>
-          <Pressable onPress={() => router.push('/(loueur)/reservations')}>
+          <Pressable onPress={() => router.push('/reservations')}>
             <Text style={styles.sectionLink}>Voir tout</Text>
           </Pressable>
         </View>
@@ -176,7 +176,7 @@ export default function LoueurDashboard() {
             <Card
               key={res.id}
               style={styles.bookingCard}
-              onPress={() => router.push({ pathname: '/(loueur)/reservations/[id]', params: { id: res.id } })}
+              onPress={() => router.push({ pathname: '/reservations', params: { id: res.id } })}
             >
               <View style={styles.bookingCardHeader}>
                 <View>

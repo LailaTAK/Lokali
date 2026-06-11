@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Image, Pressable, Platform, Dimensions } from 'react-native';
 import MapView, { Marker, Callout, PROVIDER_DEFAULT, Region } from 'react-native-maps';
+import Constants from 'expo-constants';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocation } from '../hooks/useLocation';
 import { colors } from '../constants/colors';
@@ -25,6 +26,9 @@ export interface BienMapProps {
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const googleMapsApiKeyConfigured =
+  Platform.OS !== 'android' ||
+  Boolean(Constants.expoConfig?.extra?.googleMapsApiKeyConfigured);
 
 /**
  * Property map display component.
@@ -64,7 +68,7 @@ export const BienMap: React.FC<BienMapProps> = ({
 
   // Center on pins when properties list updates
   useEffect(() => {
-    if (properties.length > 0 && mapRef.current) {
+    if (googleMapsApiKeyConfigured && properties.length > 0 && mapRef.current) {
       // Fit map to coordinates of all visible pins
       const coordinates = properties.map((p) => ({
         latitude: p.lat,
@@ -76,6 +80,18 @@ export const BienMap: React.FC<BienMapProps> = ({
       });
     }
   }, [properties]);
+
+  if (!googleMapsApiKeyConfigured) {
+    return (
+      <View style={[styles.container, styles.unavailableContainer]}>
+        <Ionicons name="map-outline" size={32} color={colors.light.primary} />
+        <Text style={styles.unavailableTitle}>Carte indisponible</Text>
+        <Text style={styles.unavailableText}>
+          Configurez EXPO_PUBLIC_GOOGLE_MAPS_API_KEY puis relancez le build Android.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -144,6 +160,23 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject,
+  },
+  unavailableContainer: {
+    padding: spacing.lg,
+    justifyContent: 'center',
+    backgroundColor: colors.light.surface,
+  },
+  unavailableTitle: {
+    marginTop: spacing.sm,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
+    color: colors.light.text,
+  },
+  unavailableText: {
+    marginTop: spacing.xs,
+    fontSize: fontSize.sm,
+    color: colors.light.textMuted,
+    textAlign: 'center',
   },
   pricePin: {
     backgroundColor: colors.light.primary,

@@ -90,23 +90,23 @@ export const notificationsService = {
         switch (type) {
           case 'RESERVATION':
             if (id) {
-              router.push({ pathname: '/(tabs)/reservations/[id]', params: { id } });
+              router.push({ pathname: '/reservations', params: { id } });
             } else {
-              router.push('/(tabs)/reservations/index');
+              router.push('/reservations');
             }
             break;
           case 'MESSAGE':
             if (userId) {
-              router.push({ pathname: '/(tabs)/chat/[userId]', params: { userId } });
+              router.push({ pathname: '/messages', params: { userId } });
             } else {
-              router.push('/(tabs)/chat/index');
+              router.push('/messages');
             }
             break;
           case 'MODERATION':
-            router.push('/(tabs)/profile/alertes');
+            router.push('/annonces');
             break;
           default:
-            router.push('/(tabs)/profile/alertes');
+            router.push('/');
         }
       }
     );

@@ -118,7 +118,7 @@ client.interceptors.response.use(
     // If refresh token endpoint itself returns 401, clear tokens and redirect to login
     if (originalRequest.url?.includes('/auth/refresh')) {
       await tokenStorage.clearTokens();
-      router.replace('/(auth)/login');
+      router.replace('/login');
       return Promise.reject(error);
     }
 
@@ -173,7 +173,7 @@ client.interceptors.response.use(
       // Invalidate tokens, reject queue, and force exit to login
       processQueue(refreshError, null);
       await tokenStorage.clearTokens();
-      router.replace('/(auth)/login');
+      router.replace('/login');
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;

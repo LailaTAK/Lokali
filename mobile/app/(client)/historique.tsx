@@ -209,7 +209,7 @@ export default function HistoriqueScreen() {
                       label="Régler le paiement"
                       onPress={() =>
                         router.push({
-                          pathname: '/(client)/paiement',
+                          pathname: '/paiement',
                           params: { id: item.id },
                         })
                       }

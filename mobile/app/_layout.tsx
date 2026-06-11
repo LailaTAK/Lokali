@@ -69,27 +69,27 @@ export default function RootLayout() {
     if (!isAuthenticated) {
       // Force unauthenticated users to Login screen
       if (!inAuthGroup) {
-        router.replace('/(auth)/login');
+        router.replace('/login');
       }
     } else if (user) {
       // Redirect authenticated users trying to access login screens or incorrect group sections
       if (inAuthGroup) {
         if (user.role === 'ADMINISTRATEUR') {
-          router.replace('/(admin)/stats');
+          router.replace('/stats');
         } else if (user.role === 'LOUEUR') {
-          router.replace('/(loueur)/dashboard');
+          router.replace('/dashboard');
         } else {
-          router.replace('/(client)/index');
+          router.replace('/');
         }
       } else if (user.role === 'CLIENT' && (inLoueurGroup || inAdminGroup)) {
         // CLIENT attempts to enter LOUEUR/ADMIN directories → bounce back
-        router.replace('/(client)/index');
+        router.replace('/');
       } else if (user.role === 'LOUEUR' && (inClientGroup || inAdminGroup)) {
         // LOUEUR attempts to enter CLIENT/ADMIN directories → redirect to host dashboard
-        router.replace('/(loueur)/dashboard');
+        router.replace('/dashboard');
       } else if (user.role === 'ADMINISTRATEUR' && (inClientGroup || inLoueurGroup)) {
         // ADMINISTRATEUR attempts to enter CLIENT/HOST directories → redirect to admin dashboard
-        router.replace('/(admin)/stats');
+        router.replace('/stats');
       }
     }
   }, [isAuthenticated, user, segments, fontsLoaded, fontError]);

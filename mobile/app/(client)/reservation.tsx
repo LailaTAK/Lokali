@@ -92,7 +92,7 @@ export default function ReservationScreen() {
         [
           {
             text: 'Voir mon historique',
-            onPress: () => router.replace('/(client)/historique'),
+            onPress: () => router.replace('/historique'),
           },
         ]
       );

@@ -50,11 +50,11 @@ export const useAuthStore = create<AuthState>()(
 
           // Navigate to dashboard based on role
           if (data.user.role === 'ADMINISTRATEUR') {
-            router.replace('/(admin)/stats');
+            router.replace('/stats');
           } else if (data.user.role === 'LOUEUR') {
-            router.replace('/(loueur)/dashboard');
+            router.replace('/dashboard');
           } else {
-            router.replace('/(client)/index');
+            router.replace('/');
           }
         } catch (error) {
           get().clearAuth();
@@ -80,7 +80,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
           });
 
-          router.replace('/(client)/index');
+          router.replace('/');
         } catch (error) {
           get().clearAuth();
           throw error;
@@ -98,7 +98,7 @@ export const useAuthStore = create<AuthState>()(
         } finally {
           get().clearAuth();
           set({ isLoading: false });
-          router.replace('/(auth)/login');
+          router.replace('/login');
         }
       },
 

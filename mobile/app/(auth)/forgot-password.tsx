@@ -97,7 +97,7 @@ export default function ForgotPasswordScreen() {
       Alert.alert(
         'Succès',
         'Votre mot de passe a été modifié avec succès. Vous pouvez maintenant vous connecter.',
-        [{ text: 'Se connecter', onPress: () => router.replace('/(auth)/login') }]
+        [{ text: 'Se connecter', onPress: () => router.replace('/login') }]
       );
     } catch (err) {
       setErrorMsg('Erreur lors du changement de mot de passe.');
