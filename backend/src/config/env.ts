@@ -24,7 +24,7 @@ const envSchema = z.object({
   SENDGRID_FROM: z.string().email('SENDGRID_FROM must be a valid email'),
   MAPBOX_TOKEN: z.string().min(1, 'MAPBOX_TOKEN is required'),
   SENTRY_DSN: z.string().min(1, 'SENTRY_DSN is required'),
-  FIREBASE_SERVICE_ACCOUNT: z.string().min(1, 'FIREBASE_SERVICE_ACCOUNT JSON string is required'),
+  FIREBASE_SERVICE_ACCOUNT: z.string().optional().default(''),
   LOGTAIL_TOKEN: z.string().optional(),
   PORT: z.preprocess((val) => (val ? Number(val) : 5000), z.number().int().positive()),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),

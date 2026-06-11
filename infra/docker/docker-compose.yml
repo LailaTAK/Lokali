@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15-alpine
@@ -9,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-lokali_secret}
       POSTGRES_DB: ${DB_NAME:-lokali_db}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata-dev:/var/lib/postgresql/data
     healthcheck:
@@ -39,16 +37,13 @@ services:
     restart: always
     ports:
       - "5000:5000"
+    env_file:
+      - ../../backend/.env
     environment:
-      - NODE_ENV=development
-      - PORT=5000
-      - DATABASE_URL=postgresql://${DB_USER:-lokali}:${DB_PASSWORD:-lokali_secret}@postgres:5432/${DB_NAME:-lokali_db}?schema=public
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=${JWT_SECRET:-jwt_secret_lokali_key_2026_dev_env}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-jwt_refresh_secret_lokali_key_2026_dev_env}
-      - JWT_EXPIRES_IN=1h
-      - JWT_REFRESH_EXPIRES_IN=7d
-      - CORS_ORIGINS=*
+      NODE_ENV: "development"
+      PORT: "5000"
+      DATABASE_URL: "postgresql://${DB_USER:-lokali}:${DB_PASSWORD:-lokali_secret}@postgres:5432/${DB_NAME:-lokali_db}?schema=public"
+      REDIS_URL: "redis://redis:6379"
     depends_on:
       postgres:
         condition: service_healthy
