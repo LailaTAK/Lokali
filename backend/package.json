@@ -2,11 +2,11 @@
   "name": "lokali-backend",
   "version": "1.0.0",
   "description": "Backend API for LOKALI Rental Application",
-  "main": "dist/server.js",
+  "main": "dist/src/server.js",
   "scripts": {
     "dev": "nodemon src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "test": "jest --runInBand --detectOpenHandles",
     "lint": "eslint src/**/*.ts",
     "db:migrate": "prisma migrate dev",

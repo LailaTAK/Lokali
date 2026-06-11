@@ -1,7 +1,11 @@
 # --- STAGE 1: Build & Compile TypeScript ---
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS builder
 
 WORKDIR /usr/src/app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends openssl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy dependency configuration files
 COPY package*.json ./
@@ -20,16 +24,20 @@ RUN npx prisma generate
 RUN npm run build
 
 # Prune node_modules to keep only production dependencies
-RUN npm prune --production
+RUN npm prune --omit=dev
 
 
 # --- STAGE 2: Lightweight Production Execution ---
-FROM node:20-alpine AS production
+FROM node:20-bookworm-slim AS production
 
 WORKDIR /usr/src/app
 
 ENV NODE_ENV=production
 ENV PORT=5000
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends openssl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy compiled resources and production dependencies from builder stage
 COPY --from=builder /usr/src/app/package*.json ./
@@ -53,4 +61,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
     req.end(); \
   "
 
-CMD ["node", "dist/server.js"]
+CMD ["node", "dist/src/server.js"]
