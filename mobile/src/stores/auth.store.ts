@@ -57,7 +57,6 @@ export const useAuthStore = create<AuthState>()(
             router.replace('/');
           }
         } catch (error) {
-          get().clearAuth();
           throw error;
         } finally {
           set({ isLoading: false });
@@ -82,7 +81,6 @@ export const useAuthStore = create<AuthState>()(
 
           router.replace('/');
         } catch (error) {
-          get().clearAuth();
           throw error;
         } finally {
           set({ isLoading: false });

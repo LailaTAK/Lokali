@@ -12,7 +12,7 @@ export const bienTypeEnum = z.enum(['APPARTEMENT', 'MAISON', 'STUDIO', 'CHAMBRE'
 export const createBienSchema = z.object({
   titre: z.string().min(3, 'Le titre doit faire au moins 3 caractères.'),
   description: z.string().min(10, 'La description doit faire au moins 10 caractères.'),
-  adresse: z.string().min(5, "L'adresse est obligatoire."),
+  adresse: z.string().min(5, "L'adresse doit contenir au moins 5 caracteres."),
   ville: z.string().min(1, 'La ville est obligatoire.'),
   superficie: z.preprocess((val) => Number(val), z.number().positive('La superficie doit être un nombre positif.')),
   nbPieces: z.preprocess((val) => Number(val), z.number().int().positive('Le nombre de pièces doit être un entier positif.')),

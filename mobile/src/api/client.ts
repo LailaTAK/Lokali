@@ -115,6 +115,14 @@ client.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // Login/register 401 responses are credential errors, not expired sessions.
+    if (
+      originalRequest.url?.includes('/auth/login') ||
+      originalRequest.url?.includes('/auth/register')
+    ) {
+      return Promise.reject(error);
+    }
+
     // If refresh token endpoint itself returns 401, clear tokens and redirect to login
     if (originalRequest.url?.includes('/auth/refresh')) {
       await tokenStorage.clearTokens();

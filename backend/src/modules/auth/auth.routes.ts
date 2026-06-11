@@ -9,22 +9,21 @@ import {
 } from './auth.controller';
 import { registerSchema, loginSchema, refreshSchema } from './auth.schema';
 import { validate } from '../../middlewares/validate.middleware';
-import { authLimiter } from '../../middlewares/rateLimiter.middleware';
 import { authenticate } from '../../middlewares/auth.middleware';
 
 const router = Router();
 
 /**
  * Route: User Registration.
- * Rate limited by IP, validated against registration input expectations.
+ * Validated against registration input expectations.
  */
-router.post('/register', authLimiter, validate(registerSchema), registerController);
+router.post('/register', validate(registerSchema), registerController);
 
 /**
  * Route: User Authentication / Login.
- * Rate limited by IP, validated against login credentials expectations.
+ * Validated against login credentials expectations.
  */
-router.post('/login', authLimiter, validate(loginSchema), loginController);
+router.post('/login', validate(loginSchema), loginController);
 
 /**
  * Route: JWT Access Token rotation.

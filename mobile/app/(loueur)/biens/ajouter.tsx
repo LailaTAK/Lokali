@@ -22,6 +22,22 @@ import { colors } from '../../../src/constants/colors';
 import { spacing, fontSize, fontWeight, borderRadius } from '../../../src/constants/spacing';
 
 const DRAFT_STORAGE_KEY = 'lokali_bien_draft';
+const MIN_ADDRESS_LENGTH = 5;
+
+function parseNumericInput(value: string): number {
+  return Number(value.replace(',', '.'));
+}
+
+function getValidationSummary(validationErrors: any[] | undefined): string | null {
+  if (!Array.isArray(validationErrors) || validationErrors.length === 0) {
+    return null;
+  }
+
+  return validationErrors
+    .map((item) => item.message)
+    .filter(Boolean)
+    .join('\n');
+}
 
 // List of common amenities
 const AMENITIES_LIST = [
@@ -132,15 +148,22 @@ export default function AjouterBienScreen() {
       if (titre.trim().length < 3) newErrors.titre = 'Le titre doit faire au moins 3 caractères.';
       if (description.trim().length < 10) newErrors.description = 'La description doit faire au moins 10 caractères.';
     } else if (step === 2) {
-      if (!adresse.trim()) newErrors.adresse = 'L\'adresse est obligatoire.';
+      if (adresse.trim().length < MIN_ADDRESS_LENGTH) {
+        newErrors.adresse = "L'adresse doit contenir au moins 5 caracteres.";
+      }
       if (!ville.trim()) newErrors.ville = 'La ville est obligatoire.';
-      if (!superficie || isNaN(Number(superficie)) || Number(superficie) <= 0) {
+      if (!superficie || isNaN(parseNumericInput(superficie)) || parseNumericInput(superficie) <= 0) {
         newErrors.superficie = 'Saisissez une superficie valide.';
       }
-      if (!nbPieces || isNaN(Number(nbPieces)) || Number(nbPieces) <= 0) {
+      if (
+        !nbPieces ||
+        isNaN(parseNumericInput(nbPieces)) ||
+        parseNumericInput(nbPieces) <= 0 ||
+        !Number.isInteger(parseNumericInput(nbPieces))
+      ) {
         newErrors.nbPieces = 'Saisissez un nombre de pièces valide.';
       }
-      if (!loyer || isNaN(Number(loyer)) || Number(loyer) <= 0) {
+      if (!loyer || isNaN(parseNumericInput(loyer)) || parseNumericInput(loyer) <= 0) {
         newErrors.loyer = 'Saisissez un montant de loyer valide.';
       }
     } else if (step === 3) {
@@ -187,17 +210,49 @@ export default function AjouterBienScreen() {
   };
 
   const handlePublish = async () => {
+    const finalErrors: Record<string, string> = {};
+
+    if (titre.trim().length < 3) finalErrors.titre = 'Le titre doit faire au moins 3 caracteres.';
+    if (description.trim().length < 10) {
+      finalErrors.description = 'La description doit faire au moins 10 caracteres.';
+    }
+    if (adresse.trim().length < MIN_ADDRESS_LENGTH) {
+      finalErrors.adresse = "L'adresse doit contenir au moins 5 caracteres.";
+    }
+    if (!ville.trim()) finalErrors.ville = 'La ville est obligatoire.';
+    if (!superficie || isNaN(parseNumericInput(superficie)) || parseNumericInput(superficie) <= 0) {
+      finalErrors.superficie = 'Saisissez une superficie valide.';
+    }
+    if (
+      !nbPieces ||
+      isNaN(parseNumericInput(nbPieces)) ||
+      parseNumericInput(nbPieces) <= 0 ||
+      !Number.isInteger(parseNumericInput(nbPieces))
+    ) {
+      finalErrors.nbPieces = 'Saisissez un nombre de pieces valide.';
+    }
+    if (!loyer || isNaN(parseNumericInput(loyer)) || parseNumericInput(loyer) <= 0) {
+      finalErrors.loyer = 'Saisissez un montant de loyer valide.';
+    }
+
+    if (Object.keys(finalErrors).length > 0) {
+      setErrors(finalErrors);
+      setStep(finalErrors.titre || finalErrors.description ? 1 : 2);
+      Alert.alert('Erreur', Object.values(finalErrors)[0]);
+      return;
+    }
+
     setLoading(true);
     try {
       // 1. Submit property payload to backend database
       const payload = {
-        titre,
-        description,
-        adresse,
-        ville,
-        superficie: Number(superficie),
-        nbPieces: Number(nbPieces),
-        loyer: Number(loyer),
+        titre: titre.trim(),
+        description: description.trim(),
+        adresse: adresse.trim(),
+        ville: ville.trim(),
+        superficie: parseNumericInput(superficie),
+        nbPieces: parseNumericInput(nbPieces),
+        loyer: parseNumericInput(loyer),
         type,
         equipements: selectedAmenities,
       };
@@ -229,11 +284,13 @@ export default function AjouterBienScreen() {
           },
         },
       ]);
-    } catch (err) {
-      console.error('Failed to publish property:', err);
+    } catch (err: any) {
+      console.warn('Failed to publish property:', err.response?.data || err.message);
+      const validationSummary = getValidationSummary(err.response?.data?.errors);
       const errMsg =
-        (err as any).response?.data?.message ||
-        'Une erreur est survenue lors de la création de la propriété.';
+        validationSummary ||
+        err.response?.data?.message ||
+        'Une erreur est survenue lors de la creation du bien.';
       Alert.alert('Erreur', errMsg);
     } finally {
       setLoading(false);
