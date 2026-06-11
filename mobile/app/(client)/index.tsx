@@ -108,13 +108,20 @@ export default function ExploreScreen() {
 
         <Pressable
           onPress={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
-          style={[styles.toggleModeButton, shadows.sm]}
+          style={[styles.actionButton, shadows.sm]}
         >
           <Ionicons
             name={viewMode === 'list' ? 'map-outline' : 'list-outline'}
             size={20}
             color={colors.light.primary}
           />
+        </Pressable>
+
+        <Pressable
+          onPress={() => router.push('/parametres')}
+          style={[styles.actionButton, styles.settingsButton, shadows.sm]}
+        >
+          <Ionicons name="person-circle-outline" size={22} color={colors.light.primary} />
         </Pressable>
       </View>
 
@@ -289,7 +296,7 @@ const styles = StyleSheet.create({
     color: colors.light.text,
     marginLeft: spacing.sm,
   },
-  toggleModeButton: {
+  actionButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -298,6 +305,9 @@ const styles = StyleSheet.create({
     borderColor: colors.light.border,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  settingsButton: {
+    marginLeft: spacing.sm,
   },
   categoriesWrapper: {
     borderBottomWidth: 1,

@@ -99,7 +99,7 @@ export const useBiensStore = create<BiensState>((set, get) => ({
       const data = await biensApi.getBienById(id);
       set({
         bienSelectionne: data.bien,
-        selectedBienAnnonces: data.annonces,
+        selectedBienAnnonces: Array.isArray(data.annonces) ? data.annonces : [],
         selectedBienStats: data.stats,
       });
     } catch (error) {

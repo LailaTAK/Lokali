@@ -57,9 +57,12 @@ export default function BienDetailsScreen() {
 
   const bien = bienSelectionne;
   const stats = selectedBienStats || { totalReservations: 0, averageRating: 0, reviewsCount: 0 };
+  const activeAnnonce =
+    selectedBienAnnonces.find((annonce) => annonce.statut === 'ACTIF') ||
+    selectedBienAnnonces[0];
 
   // Calculate pricing per night estimation for bookings
-  const rawNightPrice = bien.loyer / 30;
+  const rawNightPrice = activeAnnonce?.prixParNuit || bien.loyer / 30;
   const nightPrice = Math.round(rawNightPrice);
 
   const shouldTruncateDescription = bien.description.length > 180;
@@ -210,8 +213,14 @@ export default function BienDetailsScreen() {
         </View>
 
         <Button
-          label="Réserver"
-          onPress={() => router.push({ pathname: '/reservation', params: { id: bien.id } })}
+          label={activeAnnonce ? 'Réserver' : 'Indisponible'}
+          disabled={!activeAnnonce}
+          onPress={() =>
+            router.push({
+              pathname: '/reservation',
+              params: { id: bien.id, annonceId: activeAnnonce.id },
+            })
+          }
           style={styles.reserveBtn}
         />
       </View>

@@ -81,7 +81,7 @@ export function useBiens() {
         // Hydrate from cache immediately
         useBiensStore.setState({
           bienSelectionne: cached.data.bien,
-          selectedBienAnnonces: cached.data.annonces,
+          selectedBienAnnonces: Array.isArray(cached.data.annonces) ? cached.data.annonces : [],
           selectedBienStats: cached.data.stats,
         });
         return;

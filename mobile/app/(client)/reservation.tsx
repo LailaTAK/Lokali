@@ -21,7 +21,6 @@ import { Input } from '../../src/components/Input';
 import { Button } from '../../src/components/Button';
 import { colors } from '../../src/constants/colors';
 import { spacing, fontSize, fontWeight } from '../../src/constants/spacing';
-import { createReservation } from '../../src/api/reservations.api';
 
 /**
  * Reservation Checkout Screen.
@@ -29,8 +28,10 @@ import { createReservation } from '../../src/api/reservations.api';
  * and sends reservation requests to the backend with history routing on success.
  */
 export default function ReservationScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { bienSelectionne, selectedBienAnnonces, fetchBienWithCache } = useBiens();
+  const { id, annonceId } = useLocalSearchParams<{ id: string; annonceId?: string }>();
+  const routeBienId = Array.isArray(id) ? id[0] : id;
+  const routeAnnonceId = Array.isArray(annonceId) ? annonceId[0] : annonceId;
+  const { bienSelectionne, selectedBienAnnonces, fetchBienWithCache, isLoading } = useBiens();
   const { createReservation: storeCreateReservation, isLoading: isCreating } = useReservationsStore();
 
   const [selectedRange, setSelectedRange] = useState<{
@@ -42,15 +43,37 @@ export default function ReservationScreen() {
 
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [detailsError, setDetailsError] = useState<string | null>(null);
 
   // Load property details and linked announcements on mount
   useEffect(() => {
-    if (id) {
-      fetchBienWithCache(id);
-    }
-  }, [id]);
+    let mounted = true;
 
-  if (!bienSelectionne || selectedBienAnnonces.length === 0) {
+    if (!routeBienId) {
+      setDetailsError("Impossible d'identifier le logement à réserver.");
+      return;
+    }
+
+    setDetailsError(null);
+    fetchBienWithCache(routeBienId).catch(() => {
+      if (mounted) {
+        setDetailsError("Impossible de charger les détails de l'annonce.");
+      }
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [routeBienId, fetchBienWithCache]);
+
+  const isSelectedBienReady = Boolean(routeBienId && bienSelectionne?.id === routeBienId);
+  const activeAnnonce = isSelectedBienReady
+    ? selectedBienAnnonces.find((annonce) => annonce.id === routeAnnonceId) ||
+      selectedBienAnnonces.find((annonce) => annonce.statut === 'ACTIF') ||
+      selectedBienAnnonces[0]
+    : null;
+
+  if (!detailsError && (!isSelectedBienReady || isLoading)) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.light.primary} />
@@ -59,9 +82,51 @@ export default function ReservationScreen() {
     );
   }
 
+  if (detailsError || !bienSelectionne) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.headerBar}>
+          <Pressable onPress={() => router.back()} style={styles.backButton} hitSlop={15}>
+            <Ionicons name="arrow-back" size={24} color={colors.light.text} />
+          </Pressable>
+          <Text style={styles.headerTitle}>Réservation</Text>
+          <View style={{ width: 44 }} />
+        </View>
+        <View style={styles.stateContainer}>
+          <Ionicons name="alert-circle-outline" size={42} color={colors.light.error} />
+          <Text style={styles.stateTitle}>Annonce introuvable</Text>
+          <Text style={styles.stateText}>
+            {detailsError || "Ce logement n'a pas pu être chargé."}
+          </Text>
+          <Button label="Retour aux logements" onPress={() => router.replace('/')} style={styles.stateButton} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!activeAnnonce) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.headerBar}>
+          <Pressable onPress={() => router.back()} style={styles.backButton} hitSlop={15}>
+            <Ionicons name="arrow-back" size={24} color={colors.light.text} />
+          </Pressable>
+          <Text style={styles.headerTitle}>Réservation</Text>
+          <View style={{ width: 44 }} />
+        </View>
+        <View style={styles.stateContainer}>
+          <Ionicons name="calendar-clear-outline" size={42} color={colors.light.primary} />
+          <Text style={styles.stateTitle}>Réservation indisponible</Text>
+          <Text style={styles.stateText}>
+            Ce logement n'a pas encore d'annonce active. Vous pouvez consulter un autre bien disponible.
+          </Text>
+          <Button label="Explorer les logements" onPress={() => router.replace('/')} style={styles.stateButton} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   const bien = bienSelectionne;
-  // Get active announcement linked to this property
-  const activeAnnonce = selectedBienAnnonces[0];
 
   // Calculate pricing per night
   const nightPrice = activeAnnonce.prixParNuit || Math.round(bien.loyer / 30);
@@ -79,7 +144,7 @@ export default function ReservationScreen() {
     setLoading(true);
     try {
       // Dispatch API request to create pending reservation request
-      await createReservation({
+      await storeCreateReservation({
         annonceId: activeAnnonce.id,
         dateDebut: selectedRange.checkIn.toISOString().split('T')[0],
         dateFin: selectedRange.checkOut.toISOString().split('T')[0],
@@ -156,7 +221,7 @@ export default function ReservationScreen() {
               checkOut={selectedRange.checkOut}
               nbNuits={selectedRange.nbNuits}
               montantTotal={selectedRange.montantTotal}
-              loading={loading}
+              loading={loading || isCreating}
               onConfirm={handleConfirmReservation}
             />
           </View>
@@ -205,6 +270,29 @@ const styles = StyleSheet.create({
     color: colors.light.textMuted,
     marginTop: spacing.md,
     fontWeight: fontWeight.semibold,
+  },
+  stateContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.xl,
+  },
+  stateTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    color: colors.light.text,
+    marginTop: spacing.md,
+    textAlign: 'center',
+  },
+  stateText: {
+    fontSize: fontSize.sm,
+    color: colors.light.textMuted,
+    lineHeight: 22,
+    marginTop: spacing.sm,
+    textAlign: 'center',
+  },
+  stateButton: {
+    marginTop: spacing.xl,
   },
   sectionTitle: {
     fontSize: fontSize.md,
