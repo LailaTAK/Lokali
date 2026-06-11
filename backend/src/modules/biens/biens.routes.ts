@@ -15,7 +15,7 @@ import {
   updateBienSchema,
   filterBiensSchema,
 } from './biens.schema';
-import { authenticate } from '../../middlewares/auth.middleware';
+import { authenticate, optionalAuth } from '../../middlewares/auth.middleware';
 import { authorize } from '../../middlewares/role.middleware';
 import { validate, validateQuery } from '../../middlewares/validate.middleware';
 import { uploadLimiter } from '../../middlewares/rateLimiter.middleware';
@@ -28,7 +28,7 @@ const router = Router();
  * Method: GET
  * Access: Public. Validates query parameters.
  */
-router.get('/', validateQuery(filterBiensSchema), getBiensController);
+router.get('/', optionalAuth, validateQuery(filterBiensSchema), getBiensController);
 
 /**
  * Route: Register a new property.

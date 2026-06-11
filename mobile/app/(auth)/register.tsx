@@ -125,7 +125,12 @@ export default function RegisterScreen() {
       if (err.response?.status === 409) {
         setAuthError('Cette adresse email est déjà enregistrée.');
       } else {
-        setAuthError('Une erreur est survenue lors de la création du compte.');
+        setAuthError(
+          err.response?.data?.message ||
+            err.response?.data?.error ||
+            err.message ||
+            'Une erreur est survenue lors de la création du compte.'
+        );
       }
     }
   };

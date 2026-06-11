@@ -103,7 +103,7 @@ export const useReservationsStore = create<ReservationsState>((set, get) => ({
       }));
       return newReservation;
     } catch (error) {
-      console.error('Failed to create reservation request:', error);
+      console.warn('Failed to create reservation request:', error);
       throw error;
     } finally {
       set({ isLoading: false });

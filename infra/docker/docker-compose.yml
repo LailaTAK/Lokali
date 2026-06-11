@@ -44,6 +44,7 @@ services:
       PORT: "5000"
       DATABASE_URL: "postgresql://${DB_USER:-lokali}:${DB_PASSWORD:-lokali_secret}@postgres:5432/${DB_NAME:-lokali_db}?schema=public"
       REDIS_URL: "redis://redis:6379"
+    command: sh -c "npx prisma migrate deploy && node dist/src/server.js"
     depends_on:
       postgres:
         condition: service_healthy

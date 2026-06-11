@@ -36,7 +36,7 @@ export const ENDPOINTS = {
     update: (id: string) => `/biens/${id}`,
     delete: (id: string) => `/biens/${id}`,
     photos: (id: string) => `/biens/${id}/photos`,
-    status: (id: string) => `/biens/${id}/status`,
+    status: (id: string) => `/biens/${id}/statut`,
   },
   annonces: {
     list: '/annonces',

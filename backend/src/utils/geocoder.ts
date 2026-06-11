@@ -8,6 +8,31 @@ export interface Coordinates {
   lng: number;
 }
 
+const FALLBACK_COORDINATES: Record<string, Coordinates> = {
+  dakar: { lat: 14.6937, lng: -17.4441 },
+  'saint-louis': { lat: 16.0326, lng: -16.4818 },
+  paris: { lat: 48.8566, lng: 2.3522 },
+  lyon: { lat: 45.764, lng: 4.8357 },
+  marseille: { lat: 43.2965, lng: 5.3698 },
+};
+
+function getDevelopmentFallbackCoordinates(address: string): Coordinates {
+  const normalizedAddress = address
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+  const matchedCity = Object.keys(FALLBACK_COORDINATES).find((city) =>
+    normalizedAddress.includes(city)
+  );
+
+  return matchedCity ? FALLBACK_COORDINATES[matchedCity] : FALLBACK_COORDINATES.dakar;
+}
+
+function canUseDevelopmentFallback(): boolean {
+  return env.NODE_ENV !== 'production' && (!env.MAPBOX_TOKEN || env.MAPBOX_TOKEN === 'dummy');
+}
+
 /**
  * Geocodes an address string using the Mapbox Places API to obtain GPS coordinates.
  * 
@@ -18,6 +43,13 @@ export interface Coordinates {
 export async function geocodeAddress(address: string): Promise<Coordinates> {
   if (!address || address.trim() === '') {
     throw new Error('Address string cannot be empty.');
+  }
+
+  if (canUseDevelopmentFallback()) {
+    logger.warn(
+      `MAPBOX_TOKEN is not configured; using development coordinates fallback for "${address}".`
+    );
+    return getDevelopmentFallbackCoordinates(address);
   }
 
   const encodedAddress = encodeURIComponent(address);

@@ -27,7 +27,7 @@ export async function getBiensController(
   next: NextFunction
 ): Promise<void> {
   try {
-    const result = await getBiens(req.query);
+    const result = await getBiens(req.query, req.user);
     res.status(200).json(result);
   } catch (error) {
     next(error);

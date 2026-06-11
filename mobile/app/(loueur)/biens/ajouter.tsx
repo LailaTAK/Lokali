@@ -205,9 +205,10 @@ export default function AjouterBienScreen() {
       const newBien = await createBien(payload);
 
       // 2. Upload photos to S3 associated with created id
-      if (photos.length > 0) {
+      const uploadablePhotos = photos.filter((uri) => !uri.startsWith('http'));
+      if (uploadablePhotos.length > 0) {
         // Map mock URLs to upload payload (normally file blobs)
-        const dummyFiles = photos.map((uri, i) => ({
+        const dummyFiles = uploadablePhotos.map((uri, i) => ({
           uri,
           name: `photo-${i}.jpg`,
           type: 'image/jpeg',
@@ -230,7 +231,10 @@ export default function AjouterBienScreen() {
       ]);
     } catch (err) {
       console.error('Failed to publish property:', err);
-      Alert.alert('Erreur', 'Une erreur est survenue lors de la création de la propriété.');
+      const errMsg =
+        (err as any).response?.data?.message ||
+        'Une erreur est survenue lors de la création de la propriété.';
+      Alert.alert('Erreur', errMsg);
     } finally {
       setLoading(false);
     }

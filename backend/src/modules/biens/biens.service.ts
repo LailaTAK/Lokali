@@ -6,6 +6,7 @@ import { uploadFile, getSignedUrl } from '../../config/storage';
 import { AppError } from '../../middlewares/error.middleware';
 import { parsePagination, buildPaginatedResponse, PaginatedResponse } from '../../utils/pagination';
 import { CreateBienInput, UpdateBienInput, FilterBiensInput } from './biens.schema';
+import { UserPayload } from '../../middlewares/auth.middleware';
 
 export interface BienDetailResponse {
   bien: any;
@@ -27,7 +28,15 @@ export interface BienDetailResponse {
  */
 export async function createBien(loueurId: string, data: CreateBienInput): Promise<any> {
   // 1. Geocode the address to find GPS coordinates
-  const coords = await geocodeAddress(`${data.adresse}, ${data.ville}`);
+  let coords;
+  try {
+    coords = await geocodeAddress(`${data.adresse}, ${data.ville}`);
+  } catch (error: any) {
+    throw new AppError(
+      `Impossible de localiser cette adresse. Vérifiez l'adresse ou configurez MAPBOX_TOKEN. Détail: ${error.message}`,
+      400
+    );
+  }
 
   // 2. Insert the property in the database
   const bien = await prisma.bien.create({
@@ -59,7 +68,10 @@ export async function createBien(loueurId: string, data: CreateBienInput): Promi
  * @param {FilterBiensInput} filters - The search filter arguments.
  * @returns {Promise<PaginatedResponse<any>>} Paginated result.
  */
-export async function getBiens(filters: FilterBiensInput): Promise<PaginatedResponse<any>> {
+export async function getBiens(
+  filters: FilterBiensInput,
+  currentUser?: UserPayload
+): Promise<PaginatedResponse<any>> {
   const { page, limit, skip } = parsePagination({ page: filters.page, limit: filters.limit });
 
   // 1. Resolve raw SQL Haversine filter if lat, lng, and radius (rayon) are provided
@@ -83,6 +95,7 @@ export async function getBiens(filters: FilterBiensInput): Promise<PaginatedResp
   // 2. Build the Prisma where filter object
   const where: any = {
     deletedAt: null, // exclude soft-deleted properties
+    ...(currentUser?.role === 'LOUEUR' ? { loueurId: currentUser.id } : {}),
     ...(filters.ville ? { ville: { contains: filters.ville, mode: 'insensitive' } } : {}),
     ...(filters.type ? { type: filters.type } : {}),
     ...(filters.prixMin || filters.prixMax ? {

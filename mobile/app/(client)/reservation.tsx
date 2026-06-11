@@ -22,6 +22,13 @@ import { Button } from '../../src/components/Button';
 import { colors } from '../../src/constants/colors';
 import { spacing, fontSize, fontWeight } from '../../src/constants/spacing';
 
+function formatLocalDateForApi(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 /**
  * Reservation Checkout Screen.
  * Orchestrates date range pickers, optional message input, dynamic recap totals,
@@ -146,8 +153,8 @@ export default function ReservationScreen() {
       // Dispatch API request to create pending reservation request
       await storeCreateReservation({
         annonceId: activeAnnonce.id,
-        dateDebut: selectedRange.checkIn.toISOString().split('T')[0],
-        dateFin: selectedRange.checkOut.toISOString().split('T')[0],
+        dateDebut: formatLocalDateForApi(selectedRange.checkIn),
+        dateFin: formatLocalDateForApi(selectedRange.checkOut),
         message: message.trim() ? message : undefined,
       });
 
@@ -162,7 +169,15 @@ export default function ReservationScreen() {
         ]
       );
     } catch (err: any) {
-      console.error('Failed to submit booking reservation:', err);
+      console.warn('Failed to submit booking reservation:', err.response?.data || err.message);
+      const validationDetails = err.response?.data?.errors
+        ?.map((item: { message?: string }) => item.message)
+        .filter(Boolean)
+        .join('\n');
+      if (validationDetails) {
+        Alert.alert('Erreur de reservation', validationDetails);
+        return;
+      }
       const errMsg = err.response?.data?.message || 'Une erreur est survenue lors de la réservation.';
       Alert.alert('Erreur de réservation', errMsg);
     } finally {
