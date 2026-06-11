@@ -73,6 +73,7 @@ export async function getBiens(
   currentUser?: UserPayload
 ): Promise<PaginatedResponse<any>> {
   const { page, limit, skip } = parsePagination({ page: filters.page, limit: filters.limit });
+  const showOnlyReservable = !currentUser || currentUser.role === 'CLIENT';
 
   // 1. Resolve raw SQL Haversine filter if lat, lng, and radius (rayon) are provided
   let matchingIds: string[] | null = null;
@@ -96,6 +97,14 @@ export async function getBiens(
   const where: any = {
     deletedAt: null, // exclude soft-deleted properties
     ...(currentUser?.role === 'LOUEUR' ? { loueurId: currentUser.id } : {}),
+    ...(showOnlyReservable ? {
+      statut: 'DISPONIBLE',
+      annonces: {
+        some: {
+          statut: 'ACTIF',
+        },
+      },
+    } : {}),
     ...(filters.ville ? { ville: { contains: filters.ville, mode: 'insensitive' } } : {}),
     ...(filters.type ? { type: filters.type } : {}),
     ...(filters.prixMin || filters.prixMax ? {
