@@ -3,19 +3,6 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
-def localEnvProperties = new Properties()
-def localEnvFile = file("${projectRoot}/.env")
-if (localEnvFile.exists()) {
-    localEnvFile.withInputStream { localEnvProperties.load(it) }
-}
-def readLocalEnv = { key ->
-    def value = localEnvProperties.getProperty(key) ?: System.getenv(key)
-    if (value == null || value.trim().isEmpty()) {
-        return null
-    }
-    return value.trim().replaceAll(/^['"]|['"]$/, "")
-}
-def googleMapsApiKey = readLocalEnv("EXPO_PUBLIC_GOOGLE_MAPS_API_KEY") ?: readLocalEnv("GOOGLE_MAPS_API_KEY") ?: "DUMMY_GOOGLE_MAPS_API_KEY"
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -103,8 +90,6 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
-
-        manifestPlaceholders = [googleMapsApiKey: googleMapsApiKey]
 
         buildConfigField("boolean", "REACT_NATIVE_UNSTABLE_USE_RUNTIME_SCHEDULER_ALWAYS", (findProperty("reactNative.unstable_useRuntimeSchedulerAlways") ?: true).toString())
     }

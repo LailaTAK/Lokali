@@ -17,8 +17,14 @@ const googleMapsApiKeyConfigured = googleMapsApiKey !== DUMMY_GOOGLE_MAPS_API_KE
 
 module.exports = ({ config }) => ({
   ...config,
+  scheme: 'lokali',
+
+  updates: {
+    enabled: false,
+  },
   android: {
     ...config.android,
+    usesCleartextTraffic: true,
     config: {
       ...(config.android?.config || {}),
       googleMaps: {
